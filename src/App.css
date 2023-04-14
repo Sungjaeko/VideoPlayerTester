@@ -24,17 +24,16 @@
   color: #7b2cbf;
  } */
 
-.container {
+/* .container {
   display: grid;
   grid-template-columns: auto 40%;
   height: auto;
   
-}
+} */
 
-.player-wrapper {
+/* .player-wrapper {
   position: relative;
-  padding-top: 45.25%;
-  width: 70% !important;
+  padding-top: 55.25%;
   border: 10px;
   border-style: dotted;
   border-color: black;
@@ -51,16 +50,16 @@
 }
 
 #screenshot {
-  float: right;
   margin-right: 5px;
   overflow-y: scroll;
   height: 720px;
-  width: 380px;
+  width: 380px; 
   background-color: rgb(207, 232, 220);
   border: 2px solid rgb(79, 185, 227);
   padding: 10px;
   margin: 0 0 1em 0;
-}
+} */
+* { margin:0; padding:0; border:0; box-sizing: border-box; }
 
 .progressBar {
   width: 100%;
@@ -69,11 +68,54 @@
   border-color: red;
 }
 
-.col-1 {
-  align-content: center;
+.col {
+  height: 100%;
+  float: left;
 }
 
+.v1 {
+  width: 70%;
+  border: 5px;
+  border-style: dotted;
+  border-color: blue;
+}
+.v2 {
+  width: 30%;
+  border: 5px;
+  border-style: dashed;
+  border-color: green;
+}
 
+#screenshot {
+  margin-right: 5px;
+  overflow-y: scroll;
+  height: 720px;
+  width: 400px; 
+  background-color: rgb(207, 232, 220);
+  border: 2px solid rgb(79, 185, 227);
+  padding: 10px;
+  margin: 0 0 1em 0;
+}
+.player-wrapper {
+  align-content: center;
+  border: 10px;
+  border-style: dotted;
+  border-color: red;
+}
+
+.functionButtons {
+  border: 10px;
+  border-style: dashed;
+  border-color: purple;
+}
+
+.center {
+  margin: auto;
+  width: 25%;
+}
+#thumbnails {
+  width: 100%;
+}
 
 
 

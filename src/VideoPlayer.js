@@ -17,6 +17,8 @@ import "./App.css";
 
 function VideoPlayer() {
   const localVideoSource = "Test2_1_360x360_AACAudio_229.mp4";
+  const aviVideoSource =
+    "https://gidigital-uswe.streaming.media.azure.net/07f61976-118d-44ff-82af-05e858dc4a27/A00X2R.699_Patient Test_Rome Jut_1152x224_AACAudio_298.mp4";
   const baseURL = "http://localhost:3000/";
   const [playing, setPlaying] = useState(false);
   const [played, setPlayed] = useState(0);
@@ -49,6 +51,7 @@ function VideoPlayer() {
   // Screenshot setter and holder
   const screenshotButton = () => {
     var screenshotHolder = canvasCapture(canvas, ctx, playerRef);
+
     setScreenshots((screenshots) => [...screenshots, screenshotHolder]);
   };
 
@@ -133,12 +136,13 @@ function VideoPlayer() {
   }, [video]);
   return (
     <div className="container">
-      <div className="col-1">
+      <div className="col v1">
         <div className="player-wrapper">
           <ReactPlayer
-            className="react-player"
+            className="react-player center"
             ref={playerRef}
-            url={baseURL + localVideoSource}
+            //url={baseURL + localVideoSource}
+            url={aviVideoSource}
             //url="https://vimeo.com/243556536"
             playing={playing}
             muted={true}
@@ -150,7 +154,6 @@ function VideoPlayer() {
             //height={fullscreen ? "100%" : "auto"}
           />
         </div>
-
         <input
           className="progressBar"
           type="range"
@@ -162,8 +165,21 @@ function VideoPlayer() {
           onChange={handleSeek}
           onMouseUp={handleSeekMouseUp}
         />
-
-        <div className="functionButtons">
+        <div id="thumbnails" className="center">
+          {thumbnails.map((item, index) => {
+            return (
+              <img
+                src={item}
+                style={{ width: 50, margin: 0, cursor: "pointer" }}
+                alt=""
+                onClick={() => {
+                  handleSeekTo(timeSkips[index]);
+                }}
+              />
+            );
+          })}
+        </div>
+        <div className="functionButtons center">
           <button onClick={handleSeekBackward}>
             <AiFillStepBackward size={20} />
           </button>
@@ -186,7 +202,6 @@ function VideoPlayer() {
             )}
           </button>
           <button onClick={handleSeekForward}>
-            {" "}
             <AiFillStepForward size={20} />
           </button>
           <span>
@@ -206,57 +221,24 @@ function VideoPlayer() {
               }}
             />
           </div>
-          <div id="thumbnails">
-            {thumbnails.map((item, index) => {
-              return (
-                <img
-                  src={item}
-                  style={{ width: 80, margin: 0, cursor: "pointer" }}
-                  alt=""
-                  onClick={() => {
-                    handleSeekTo(timeSkips[index]);
-                  }}
-                />
-              );
-            })}
+          <div className="canvasFunctions">
+            <button id="screenshotButton" onClick={screenshotButton}>
+              <AiFillCamera size={20} />
+            </button>
+            <button
+              id="download"
+              onClick={() =>
+                screenshots.forEach((canvas) => {
+                  canvasDownload(canvas, ctx);
+                })
+              }
+            >
+              <BiDownload size={20} />
+            </button>
           </div>
-          {/* <div className="progressBar">
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step="any"
-            value={played}
-            onMouseDown={handleSeekMouseDown}
-            onChange={handleSeek}
-            onMouseUp={handleSeekMouseUp}
-          />
-        </div> */}
-          <button onClick={handleFullscreen}>
-            {fullscreen ? (
-              <BiExitFullscreen size={20} />
-            ) : (
-              <BiFullscreen size={20} />
-            )}
-          </button>
-        </div>
-        <div className="canvasFunctions">
-          <button id="screenshotButton" onClick={screenshotButton}>
-            <AiFillCamera size={20} />
-          </button>
-          <button
-            id="download"
-            onClick={() =>
-              screenshots.forEach((canvas) => {
-                canvasDownload(canvas, ctx);
-              })
-            }
-          >
-            <BiDownload size={20} />
-          </button>
         </div>
       </div>
-      <div className="col-2">
+      <div className="col v2">
         <div id="screenshot"></div>
       </div>
     </div>
