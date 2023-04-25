@@ -1,21 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
-import ReactPlayer from "react-player";
-import { BiFullscreen, BiExitFullscreen, BiDownload } from "react-icons/bi";
-import {
-  AiFillPlayCircle,
-  AiFillPauseCircle,
-  AiFillStepBackward,
-  AiFillStepForward,
-  AiFillCamera,
-} from "react-icons/ai";
 import { canvasCapture, canvasDownload } from "./canvasFunctions.js";
+import "./App.css";
+import ReactPlayer from "react-player";
+import {
+  FaPlay,
+  FaForward,
+  FaBackward,
+  FaPause,
+  FaCamera,
+  FaDownload,
+} from "react-icons/fa";
 import {
   generateVideoThumbnails,
   importFileandPreview,
 } from "@rajesh896/video-thumbnails-generator";
-import "./App.css";
+import { timestamp } from "rxjs-compat/operator/timestamp.js";
+import { ThumbDown } from "@mui/icons-material";
 
 function VideoPlayer() {
+  // var screenshotDict = {
+  //   canvas: screenshotTimestamp,
+  // };
+  // Initialize canvas elements so be accessed by both functions
+  var canvas = document.createElement("canvas");
+  var ctx = canvas.getContext("2d");
   const localVideoSource = "Test2_1_360x360_AACAudio_229.mp4";
   const aviVideoSource =
     "https://gidigital-uswe.streaming.media.azure.net/07f61976-118d-44ff-82af-05e858dc4a27/A00X2R.699_Patient Test_Rome Jut_1152x224_AACAudio_298.mp4";
@@ -23,9 +31,9 @@ function VideoPlayer() {
   const [playing, setPlaying] = useState(false);
   const [played, setPlayed] = useState(0);
   const [playedSeconds, setPlayedSeconds] = useState(0);
-  //const [loaded, setLoaded] = useState(0);
-  const [thumbnails, setThumbnails] = useState([]);
-  const thumbNumber = 10;
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [thumbnails, setThumbnails] = useState();
+  const thumbNumber = 25;
   const [duration, setDuration] = useState(0);
   const [seeking, setSeeking] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
@@ -44,20 +52,32 @@ function VideoPlayer() {
     timeSkips.push(parseFloat(duration / thumbNumber) * i);
   }
 
-  // Initialize canvas elements so be accessed by both functions
-  var canvas = document.createElement("canvas");
-  var ctx = canvas.getContext("2d");
+  const handleKeyDown = (event) => {
+    if (event.key === "b") {
+      var screenshotHolder = canvasCapture(canvas, ctx, playerRef);
+      setScreenshots((screenshots) => [...screenshots, screenshotHolder]);
+    } else if (event.key == "Left key") {
+      const currentTime = playerRef.current.getCurrentTime();
+      playerRef.current.seekTo(currentTime - 5);
+    } else if (event.key == "Right key") {
+      const currentTime = playerRef.current.getCurrentTime();
+      playerRef.current.seekTo(currentTime + 5);
+    }
+  };
 
   // Screenshot setter and holder
-  const screenshotButton = () => {
+  const screenshotButton = (event) => {
     var screenshotHolder = canvasCapture(canvas, ctx, playerRef);
-
     setScreenshots((screenshots) => [...screenshots, screenshotHolder]);
   };
 
   const handleSeekForward = () => {
     const currentTime = playerRef.current.getCurrentTime();
     playerRef.current.seekTo(currentTime + 5);
+  };
+
+  const handlePlaybackRateChange = (event) => {
+    setPlaybackRate(parseFloat(event.target.value));
   };
 
   const handleSeekTo = (time) => {
@@ -103,26 +123,13 @@ function VideoPlayer() {
     playerRef.current.seekTo(seekTo);
   };
 
-  // function handleProgressBarHover(event) {
-  //   const progressBar = event.target;
-  //   const video = playerRef.current.player.player.player;
-  //   const videoDuration = video.duration;
-  //   const mouseX = event.clientX - progressBar.getBoundingClientRect().left;
-  //   const progressPercentage = mouseX / progressBar.offsetWidth;
-  //   const currentTime = progressPercentage * videoDuration;
-  //   video.currentTime = currentTime;
-  //   const canvas = document.createElement("canvas");
-  //   canvas.width = video.videoWidth;
-  //   canvas.height = video.videoHeight;
-  //   canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-  //   const thumbnailUrl = canvas.toDataURL();
-  // }
-
   useEffect(() => {
+    generateVideoThumbnails(video, thumbNumber).then((thumb) => {
+      setThumbnails(thumb);
+    });
     importFileandPreview(video).then((res) => {
       setVideoUrl(res);
     });
-    setThumbnails([]);
     if (refs.current.video) {
       refs.current.video.style.transform = "scale(1)";
     }
@@ -134,24 +141,22 @@ function VideoPlayer() {
       refs.current.thumbButton.style.display = "block";
     }
   }, [video]);
-  return (
+  return thumbnails ? (
     <div className="container">
       <div className="col v1">
         <div className="player-wrapper">
           <ReactPlayer
             className="react-player center"
             ref={playerRef}
-            //url={baseURL + localVideoSource}
-            url={aviVideoSource}
-            //url="https://vimeo.com/243556536"
+            url={baseURL + localVideoSource}
+            //url={aviVideoSource}
             playing={playing}
             muted={true}
             onProgress={handleProgress}
             onDuration={handleDuration}
-            // width="100%"
-            // height="100%"
-            //width={fullscreen ? "100%" : "50%"}
-            //height={fullscreen ? "100%" : "auto"}
+            playbackRate={playbackRate}
+            width="70%"
+            height="70%"
           />
         </div>
         <input
@@ -165,12 +170,13 @@ function VideoPlayer() {
           onChange={handleSeek}
           onMouseUp={handleSeekMouseUp}
         />
+
         <div id="thumbnails" className="center">
           {thumbnails.map((item, index) => {
             return (
               <img
                 src={item}
-                style={{ width: 50, margin: 0, cursor: "pointer" }}
+                style={{ width: "2.54vw", margin: 0, cursor: "pointer" }}
                 alt=""
                 onClick={() => {
                   handleSeekTo(timeSkips[index]);
@@ -179,61 +185,55 @@ function VideoPlayer() {
             );
           })}
         </div>
-        <div className="functionButtons center">
-          <button onClick={handleSeekBackward}>
-            <AiFillStepBackward size={20} />
+        <div className="functionButtons centerFunctionButtons">
+          <input
+            id="playbackSpeedAdjuster"
+            type="range"
+            min="0.5"
+            max="2"
+            step="0.1"
+            value={playbackRate}
+            onChange={handlePlaybackRateChange}
+          />
+          <span id="playbackSpeedLabel">{playbackRate.toFixed(1)}</span>
+          <button id="goBackwardButton" onClick={handleSeekBackward}>
+            <FaBackward size={50} />
           </button>
           <button
+            id="playPauseButton"
+            onKeyDown={handleKeyDown}
             onClick={() => {
               handlePlayPause();
               console.log(timeSkips);
-              generateVideoThumbnails(video, thumbNumber).then((thumbs) => {
-                setThumbnails(thumbs);
-                if (refs.current.loader) {
-                  refs.current.loader.style.display = "none";
-                }
-              });
             }}
           >
-            {playing ? (
-              <AiFillPauseCircle size={24} />
-            ) : (
-              <AiFillPlayCircle size={24} />
-            )}
+            {playing ? <FaPause size={70} /> : <FaPlay size={70} />}
           </button>
-          <button onClick={handleSeekForward}>
-            <AiFillStepForward size={20} />
+          <button id="goForwardButton" onClick={handleSeekForward}>
+            <FaForward size={50} />
           </button>
-          <span>
+          <span id="currentTime">
             {new Date(playedSeconds * 1000).toISOString().substr(11, 8)}
           </span>
-          <span>/</span>
-          <span>{new Date(duration * 1000).toISOString().substr(11, 8)}</span>
-          <div style={{ display: "flex", marginTop: 25 }}>
-            <input
-              type="file"
-              id="inputfile"
-              accept="video/*"
-              onChange={(e) => {
-                if (e.target.files?.length > 0) {
-                  setVideo(e.target.files[0]);
-                }
-              }}
-            />
-          </div>
-          <div className="canvasFunctions">
+          <span id="slash">/</span>
+          <span id="remainingTime">
+            {new Date(duration * 1000).toISOString().substr(11, 8)}
+          </span>
+
+          <div id="canvasFunctions">
             <button id="screenshotButton" onClick={screenshotButton}>
-              <AiFillCamera size={20} />
+              <FaCamera size={40} />
             </button>
+
             <button
-              id="download"
+              id="downloadButton"
               onClick={() =>
                 screenshots.forEach((canvas) => {
                   canvasDownload(canvas, ctx);
                 })
               }
             >
-              <BiDownload size={20} />
+              <FaDownload size={40} />
             </button>
           </div>
         </div>
@@ -242,6 +242,22 @@ function VideoPlayer() {
         <div id="screenshot"></div>
       </div>
     </div>
+  ) : (
+    <span
+      className="fileDetectedLabel"
+      //style={{ display: "flex", marginTop: 25 }}
+    >
+      <input
+        type="file"
+        id="chooseFileButton"
+        accept="video/*"
+        onChange={(e) => {
+          if (e.target.files?.length > 0) {
+            setVideo(e.target.files[0]);
+          }
+        }}
+      />
+    </span>
   );
 }
 
