@@ -1,7 +1,7 @@
 // Canvas Screenshot Function
 export function canvasCapture(canvas, ctx, playerRef) {
   //let video = document.getElementById("videoSource");
-  console.log(playerRef.current);
+  console.log(playerRef.current.player.player.player);
   let video = playerRef.current.player.player.player;
   //let w = video.videoWidth;
   //let h = video.videoHeight;
