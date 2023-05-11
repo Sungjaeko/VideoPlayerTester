@@ -34,7 +34,7 @@ body {
 .v2 {
   width: 15%;
   border: 5px;
-  height: 57em;
+  height: 45em;
   border-style: dashed;
   border-color: black;
   float: right;
@@ -134,7 +134,7 @@ body {
 }
 .centerFunctionButtons {
   margin: auto;
-  width: 51%;
+  width: 67%;
 }
 
 #thumbnails {

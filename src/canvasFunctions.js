@@ -7,14 +7,12 @@ export function canvasCapture(canvas, ctx, playerRef) {
   //let h = video.videoHeight;
   let w = 200;
   let h = 200;
-  //canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
-  //var ctx = canvas.getContext("2d");
-  //ctx.drawImage(video, 0, 0, w - imageWidth, h - imageHeight);
   ctx.drawImage(video, 0, 0, 200, 200);
   //let cloneHolder = cloneCanvas(canvas);
   //document.body.appendChild(canvas);
+  //let wrapper = <span>{canvas}</span>;
   document.getElementById("screenshot").appendChild(canvas);
   return canvas;
 }
